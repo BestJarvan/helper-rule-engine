@@ -498,6 +498,34 @@ const operators = {
     },
     reversedOp: "multiselect_contains"
   },
+  multiselect_include: {
+    label: "Include",
+    labelForFormat: "==",
+    sqlOp: "=",
+    formatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, isForDisplay) => {
+      const opStr = isForDisplay ? "=" : "==";
+      if (valueSrc == "value")
+        return `${field} ${opStr} [${values.join(", ")}]`;
+      else
+        return `${field} ${opStr} ${values}`;
+    },
+    sqlFormatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
+      if (valueSrc == "value")
+      // set
+        return `${field} = '${values.map(v => SqlString.trim(v)).join(",")}'`;
+      else
+        return undefined; //not supported
+    },
+    spelOp: "include",
+    mongoFormatOp: mongoFormatOp1.bind(null, "$eq", v => v, false),
+    reversedOp: "multiselect_not_equals",
+    jsonLogic2: "all-in",
+    jsonLogic: (field, op, vals) => ({
+      // it's not "equals", but "includes" operator - just for example
+      "all": [ field, {"in": [{"var": ""}, vals]} ]
+    }),
+    elasticSearchQueryType: "term",
+  },
   multiselect_equals: {
     label: "Equals",
     labelForFormat: "==",

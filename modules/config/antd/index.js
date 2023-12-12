@@ -237,12 +237,11 @@ const types = {
     },
   },
   treemultiselect: {
-    defaultOperator: "multiselect_equals",
+    defaultOperator: "multiselect_include",
     widgets: {
       treemultiselect: {
         operators: [
-          "multiselect_equals",
-          "multiselect_not_equals",
+          "multiselect_include",
         ],
       }
     },

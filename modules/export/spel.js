@@ -194,6 +194,12 @@ const buildFnToFormatOp = (operator, operatorDefinition) => {
   const isFunction = spelOp.substring(spelOp.length - 2) == "()";
   const sop = isMethod ? spelOp.slice(1) : (isFunction ? spelOp.substring(0, spelOp.length - 2) : spelOp);
   let fn;
+  if (sop === 'include') {
+    return fn = (field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
+      const v = values.replace(/{|}/g, '')
+      return `include(seq.set(${v}), data.${field})`
+    };
+  }
   const cardinality = defaultValue(operatorDefinition.cardinality, 1);
   if (cardinality == 0) {
     fn = (field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
