@@ -22,6 +22,10 @@ export const _loadFromSpel = (spelStr, config, returnErrors = true) => {
   let compiledExpression;
   let convertedObj;
   let jsTree = undefined;
+  
+  if (spelStr.indexOf('include') > -1) {
+    spelStr = spelStr.replace(/(include\(seq\.set)\(([\s\S]*)\),\s*(data\.\S+)\)/g, '$3.equals({$2})')
+  }
   try {
     const compileRes = SpelExpressionEvaluator.compile(spelStr);
     compiledExpression = compileRes._compiledExpression;
