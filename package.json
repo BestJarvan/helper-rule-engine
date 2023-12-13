@@ -1,7 +1,7 @@
 {
   "name": "@bestjarvan/helper-rule-engine",
-  "version": "1.0.2",
-  "description": "rule-engine-bulder-ui",
+  "version": "1.0.3",
+  "description": "修改treeselect",
   "author": "JiangYahui <j532547613@gmail.com>",
   "main": "lib",
   "module": "lib/index.js",
