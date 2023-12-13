@@ -197,7 +197,7 @@ const buildFnToFormatOp = (operator, operatorDefinition) => {
   if (sop === 'include') {
     return fn = (field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
       const v = values.replace(/{|}/g, '')
-      return `include(seq.set(${v}), data.${field})`
+      return `include(seq.set(${v}), ${field})`
     };
   }
   const cardinality = defaultValue(operatorDefinition.cardinality, 1);
