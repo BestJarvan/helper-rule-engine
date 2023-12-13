@@ -22,9 +22,9 @@ export const _loadFromSpel = (spelStr, config, returnErrors = true) => {
   let compiledExpression;
   let convertedObj;
   let jsTree = undefined;
-  
+
   if (spelStr.indexOf('include') > -1) {
-    spelStr = spelStr.replace(/(include\(seq\.set)\(([\s\S]*)\),\s*(data\.\S+)\)/g, '$3.equals({$2})')
+    spelStr = spelStr.replace(/(include\(seq\.set)\(([\s\S]*)\),\s*(data\.\S+)\)/g, '$3.include({$2})')
   }
   try {
     const compileRes = SpelExpressionEvaluator.compile(spelStr);
@@ -381,6 +381,7 @@ const convertArg = (spel, conv, config, meta, parentSpel) => {
       [".endsWith"]: "ends_with",
       ["$contains"]: "select_any_in",
       [".equals"]: "multiselect_equals",
+      [".include"]: "multiselect_include",
       //[".containsAll"]: "multiselect_contains",
       ["CollectionUtils.containsAny()"]: "multiselect_contains"
     };

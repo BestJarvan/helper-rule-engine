@@ -1,6 +1,6 @@
 {
   "name": "@bestjarvan/helper-rule-engine",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "修改treeselect",
   "author": "JiangYahui <j532547613@gmail.com>",
   "main": "lib",
@@ -35,7 +35,6 @@
     "test": "tests"
   },
   "scripts": {
-    "prepare": "npm run build:npm",
     "for-npm": "sh ./scripts/for-npm.sh",
     "for-gpr": "sh ./scripts/for-gpr.sh",
     "build:npm": "sh ./scripts/build-npm.sh",
