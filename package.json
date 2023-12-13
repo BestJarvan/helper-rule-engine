@@ -1,6 +1,6 @@
 {
   "name": "@bestjarvan/helper-rule-engine",
-  "version": "1.0.5",
+  "version": "1.0.4",
   "description": "修改treeselect",
   "author": "JiangYahui <j532547613@gmail.com>",
   "main": "lib",
