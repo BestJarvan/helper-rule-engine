@@ -1,10 +1,10 @@
 import React from "react";
 import * as Widgets from "../components/widgets";
 import * as Operators from "../components/operators";
-import {SqlString, sqlEmptyValue, mongoEmptyValue, spelEscape, spelFixList} from "../utils/export";
-import {escapeRegExp, getTitleInListValues} from "../utils/stuff";
+import { SqlString, sqlEmptyValue, mongoEmptyValue, spelEscape, spelFixList } from "../utils/export";
+import { escapeRegExp, getTitleInListValues } from "../utils/stuff";
 import moment from "moment";
-import {settings as defaultSettings} from "../config/default";
+import { settings as defaultSettings } from "../config/default";
 
 const {
   //vanilla
@@ -84,8 +84,8 @@ const conjunctions = {
 //----------------------------  operators
 
 // helpers for mongo format
-export const mongoFormatOp1 = (mop, mc, not,  field, _op, value, useExpr, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
-  const $field = typeof field == "string" && !field.startsWith("$") ? "$"+field : field;
+export const mongoFormatOp1 = (mop, mc, not, field, _op, value, useExpr, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
+  const $field = typeof field == "string" && !field.startsWith("$") ? "$" + field : field;
   const mv = mc(value, fieldDef);
   if (mv === undefined)
     return undefined;
@@ -93,35 +93,40 @@ export const mongoFormatOp1 = (mop, mc, not,  field, _op, value, useExpr, valueS
     if (!useExpr && (!mop || mop == "$eq"))
       return { [field]: { "$ne": mv } }; // short form
     return !useExpr
-      ? { [field]: { "$not": { [mop]: mv } } } 
+      ? { [field]: { "$not": { [mop]: mv } } }
       : { "$not": { [mop]: [$field, mv] } };
   } else {
     if (!useExpr && (!mop || mop == "$eq"))
       return { [field]: mv }; // short form
     return !useExpr
-      ? { [field]: { [mop]: mv } } 
+      ? { [field]: { [mop]: mv } }
       : { [mop]: [$field, mv] };
   }
 };
 
-export const mongoFormatOp2 = (mops, not,  field, _op, values, useExpr, valueSrcs, valueTypes, opDef, operatorOptions, fieldDef) => {
-  const $field = typeof field == "string" && !field.startsWith("$") ? "$"+field : field;
+export const mongoFormatOp2 = (mops, not, field, _op, values, useExpr, valueSrcs, valueTypes, opDef, operatorOptions, fieldDef) => {
+  const $field = typeof field == "string" && !field.startsWith("$") ? "$" + field : field;
   if (not) {
     return !useExpr
-      ? { [field]: { "$not": { [mops[0]]: values[0], [mops[1]]: values[1] } } } 
-      : {"$not":
-                {"$and": [
-                  { [mops[0]]: [ $field, values[0] ] },
-                  { [mops[1]]: [ $field, values[1] ] },
-                ]}
+      ? { [field]: { "$not": { [mops[0]]: values[0], [mops[1]]: values[1] } } }
+      : {
+        "$not":
+        {
+          "$and": [
+            { [mops[0]]: [$field, values[0]] },
+            { [mops[1]]: [$field, values[1]] },
+          ]
+        }
       };
   } else {
     return !useExpr
-      ? { [field]: { [mops[0]]: values[0], [mops[1]]: values[1] } } 
-      : {"$and": [
-        { [mops[0]]: [ $field, values[0] ] },
-        { [mops[1]]: [ $field, values[1] ] },
-      ]};
+      ? { [field]: { [mops[0]]: values[0], [mops[1]]: values[1] } }
+      : {
+        "$and": [
+          { [mops[0]]: [$field, values[0]] },
+          { [mops[1]]: [$field, values[1]] },
+        ]
+      };
   }
 };
 
@@ -205,6 +210,19 @@ const operators = {
     mongoFormatOp: mongoFormatOp1.bind(null, "$gte", v => v, false),
     jsonLogic: ">=",
     elasticSearchQueryType: "range",
+  },
+  scontains: {
+    label: "包含",
+    labelForFormat: "Contains",
+    sqlOp: "Contains",
+    spelOp: ".string",
+    spelOps: ["matches", ".string"],
+    // mongoFormatOp: mongoFormatOp1.bind(null, "$regex", v => (typeof v == "string" ? escapeRegExp(v) : undefined), false),
+    //jsonLogic: (field, op, val) => ({ "in": [val, field] }),
+    jsonLogic: "in",
+    _jsonLogicIsRevArgs: true,
+    valueSources: ["value"],
+    elasticSearchQueryType: "regexp",
   },
   like: {
     label: "Contains",
@@ -479,7 +497,7 @@ const operators = {
     reversedOp: "multiselect_not_contains",
     jsonLogic2: "some-in",
     jsonLogic: (field, op, vals) => ({
-      "some": [ field, {"in": [{"var": ""}, vals]} ]
+      "some": [field, { "in": [{ "var": "" }, vals] }]
     }),
     //spelOp: ".containsAll",
     spelOp: "CollectionUtils.containsAny()",
@@ -511,7 +529,7 @@ const operators = {
     },
     sqlFormatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
       if (valueSrc == "value")
-      // set
+        // set
         return `${field} = '${values.map(v => SqlString.trim(v)).join(",")}'`;
       else
         return undefined; //not supported
@@ -522,7 +540,7 @@ const operators = {
     jsonLogic2: "all-in",
     jsonLogic: (field, op, vals) => ({
       // it's not "equals", but "includes" operator - just for example
-      "all": [ field, {"in": [{"var": ""}, vals]} ]
+      "all": [field, { "in": [{ "var": "" }, vals] }]
     }),
     elasticSearchQueryType: "term",
   },
@@ -539,7 +557,7 @@ const operators = {
     },
     sqlFormatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
       if (valueSrc == "value")
-      // set
+        // set
         return `${field} = '${values.map(v => SqlString.trim(v)).join(",")}'`;
       else
         return undefined; //not supported
@@ -550,7 +568,7 @@ const operators = {
     jsonLogic2: "all-in",
     jsonLogic: (field, op, vals) => ({
       // it's not "equals", but "includes" operator - just for example
-      "all": [ field, {"in": [{"var": ""}, vals]} ]
+      "all": [field, { "in": [{ "var": "" }, vals] }]
     }),
     elasticSearchQueryType: "term",
   },
@@ -567,7 +585,7 @@ const operators = {
     },
     sqlFormatOp: (field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
       if (valueSrc == "value")
-      // set
+        // set
         return `${field} != '${values.map(v => SqlString.trim(v)).join(",")}'`;
       else
         return undefined; //not supported
@@ -978,11 +996,11 @@ const widgets = {
     spelImportValue: (val) => {
       return [val.value, []];
     },
-    factory: ({value, setValue}) =>  
-      <input 
-        type="text" 
-        value={value || ""} 
-        onChange={e => setValue(e.target.value)} 
+    factory: ({ value, setValue }) =>
+      <input
+        type="text"
+        value={value || ""}
+        onChange={e => setValue(e.target.value)}
       />
   }
 };
@@ -998,6 +1016,7 @@ const types = {
         operators: [
           "equal",
           "not_equal",
+          "contains",
           "like",
           "not_like",
           "starts_with",
@@ -1281,7 +1300,7 @@ const settings = {
       return field;
   },
   formatSpelField: (field, parentField, parts, partsExt, fieldDefinition, config) => {
-    let fieldName = partsExt.map(({key, parent}, ind) => {
+    let fieldName = partsExt.map(({ key, parent }, ind) => {
       if (ind == 0) {
         if (parent == "[map]")
           return `#this[${spelEscape(key)}]`;
@@ -1319,7 +1338,7 @@ const settings = {
       return "!(" + q + ")";
   },
   formatAggr: (whereStr, aggrField, operator, value, valueSrc, valueType, opDef, operatorOptions, isForDisplay, aggrFieldDef) => {
-    const {labelForFormat, cardinality} = opDef;
+    const { labelForFormat, cardinality } = opDef;
     if (cardinality == 0) {
       const cond = whereStr ? ` HAVE ${whereStr}` : "";
       return `${labelForFormat} OF ${aggrField}${cond}`;

@@ -6,12 +6,12 @@ import {
 } from "../utils/ruleUtils";
 import omit from "lodash/omit";
 import pick from "lodash/pick";
-import {defaultValue, logger} from "../utils/stuff";
-import {defaultConjunction} from "../utils/defaultUtils";
-import {settings as defaultSettings} from "../config/default";
-import {completeValue} from "../utils/funcUtils";
-import {Map} from "immutable";
-import {spelEscape} from "../utils/export";
+import { defaultValue, logger } from "../utils/stuff";
+import { defaultConjunction } from "../utils/defaultUtils";
+import { settings as defaultSettings } from "../config/default";
+import { completeValue } from "../utils/funcUtils";
+import { Map } from "immutable";
+import { spelEscape } from "../utils/export";
 
 export const spelFormat = (tree, config) => {
   return _spelFormat(tree, config, false);
@@ -59,7 +59,7 @@ const formatCase = (item, config, meta, parentField = null) => {
     return undefined;
   }
   const properties = item.get("properties") || new Map();
-  
+
   const [formattedValue, valueSrc, valueType] = formatItemValue(
     config, properties, meta, null, parentField, "!case_value"
   );
@@ -76,7 +76,7 @@ const formatSwitch = (item, config, meta, parentField = null) => {
     .map((currentChild) => formatCase(currentChild, config, meta, null))
     .filter((currentChild) => typeof currentChild !== "undefined")
     .toArray();
-  
+
   if (!cases.length) return undefined;
 
   if (cases.length == 1 && !cases[0][0]) {
@@ -85,7 +85,7 @@ const formatSwitch = (item, config, meta, parentField = null) => {
   }
 
   let filteredCases = [];
-  for (let i = 0 ; i < cases.length ; i++) {
+  for (let i = 0; i < cases.length; i++) {
     if (i != (cases.length - 1) && !cases[i][0]) {
       meta.errors.push(`No condition for case ${i}`);
     } else {
@@ -98,7 +98,7 @@ const formatSwitch = (item, config, meta, parentField = null) => {
   }
 
   let left = "", right = "";
-  for (let i = 0 ; i < filteredCases.length ; i++) {
+  for (let i = 0; i < filteredCases.length; i++) {
     let [cond, value] = filteredCases[i];
     if (value == undefined)
       value = "null";
@@ -133,7 +133,7 @@ const formatGroup = (item, config, meta, parentField = null) => {
   const groupField = isRuleGroupArray ? field : parentField;
   const groupFieldDef = getFieldConfig(config, groupField) || {};
   const isSpelArray = groupFieldDef.isSpelArray;
-  
+
   // check op for reverse
   let groupOperator = properties.get("operator");
   if (!groupOperator && (!mode || mode == "some")) {
@@ -143,12 +143,12 @@ const formatGroup = (item, config, meta, parentField = null) => {
   const isGroupOpRev = realGroupOperator != groupOperator;
   const realGroupOperatorDefinition = groupOperator && getOperatorConfig(config, realGroupOperator, field) || null;
   const isGroup0 = isRuleGroup && (!realGroupOperator || realGroupOperatorDefinition.cardinality == 0);
-  
+
   // build value for aggregation op
   const [formattedValue, valueSrc, valueType] = formatItemValue(
     config, properties, meta, realGroupOperator, parentField, null
   );
-  
+
   // build filter in aggregation
   const list = children
     .map((currentChild) => formatItem(currentChild, config, meta, groupField))
@@ -182,7 +182,7 @@ const formatGroup = (item, config, meta, parentField = null) => {
   } else {
     ret = filter;
   }
-  
+
   return ret;
 };
 
@@ -198,6 +198,11 @@ const buildFnToFormatOp = (operator, operatorDefinition) => {
     return fn = (field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) => {
       const v = values.replace(/{|}/g, '')
       return `include(seq.set(${v}), ${field})`
+    };
+  } else if (sop === 'string') {
+    return fn = function fn(field, op, values, valueSrc, valueType, opDef, operatorOptions, fieldDef) {
+      const v = values.replace(/{|}/g, '')
+      return `string.contains(${field}, ${v})`
     };
   }
   const cardinality = defaultValue(operatorDefinition.cardinality, 1);
@@ -303,10 +308,10 @@ const formatRule = (item, config, meta, parentField = null) => {
   );
   if (formattedValue === undefined)
     return undefined;
-      
+
   //format field
   const formattedField = formatField(meta, config, field, parentField);
-  
+
   // format expression
   let res = formatExpression(
     meta, config, properties, formattedField, formattedValue, realOp, valueSrc, valueType, isRev
@@ -326,11 +331,11 @@ const formatItemValue = (config, properties, meta, operator, parentField, expect
   const cardinality = defaultValue(operatorDefinition.cardinality, 1);
   const iValue = properties.get("value");
   const asyncListValues = properties.get("asyncListValues");
-  
+
   let valueSrcs = [];
   let valueTypes = [];
   let formattedValue;
-  
+
   if (iValue != undefined) {
     const fvalue = iValue.map((currentValue, ind) => {
       const valueSrc = iValueSrc ? iValueSrc.get(ind) : null;
@@ -348,13 +353,13 @@ const formatItemValue = (config, properties, meta, operator, parentField, expect
       return fv;
     });
     const hasUndefinedValues = fvalue.filter(v => v === undefined).size > 0;
-    if (!( fvalue.size < cardinality || hasUndefinedValues )) {
+    if (!(fvalue.size < cardinality || hasUndefinedValues)) {
       formattedValue = cardinality > 1 ? fvalue.toArray() : (cardinality == 1 ? fvalue.first() : null);
     }
   }
-  
+
   return [
-    formattedValue, 
+    formattedValue,
     (valueSrcs.length > 1 ? valueSrcs : valueSrcs[0]),
     (valueTypes.length > 1 ? valueTypes : valueTypes[0]),
   ];
@@ -385,7 +390,7 @@ const formatValue = (meta, config, currentValue, valueSrc, valueType, fieldWidge
         args.push(operatorDef);
       }
       if (valueSrc == "field") {
-        const valFieldDefinition = getFieldConfig(config, currentValue) || {}; 
+        const valFieldDefinition = getFieldConfig(config, currentValue) || {};
         args.push(valFieldDefinition);
       }
       ret = fn(...args);
@@ -398,7 +403,7 @@ const formatValue = (meta, config, currentValue, valueSrc, valueType, fieldWidge
 
 const formatField = (meta, config, field, parentField = null) => {
   if (!field) return;
-  const {fieldSeparator} = config.settings;
+  const { fieldSeparator } = config.settings;
   const fieldDefinition = getFieldConfig(config, field) || {};
   const fieldParts = Array.isArray(field) ? field : field.split(fieldSeparator);
   const _fieldKeys = getFieldPath(field, config, parentField);
