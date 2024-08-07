@@ -141,7 +141,7 @@ export const getItemInListValues = (listValues, value) => {
   if (Array.isArray(listValues)) {
     let values;
     if (listValues.length && listValues[0].children) {
-      values = values.flat().map(v => listValue(v));
+      values = listValues.flat().map(v => listValue(v));
     } else {
       values = listValues.map(v => listValue(v));
     }
