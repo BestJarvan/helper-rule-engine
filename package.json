@@ -1,7 +1,7 @@
 {
   "name": "@bestjarvan/helper-rule-engine",
-  "version": "1.0.8",
-  "description": "兼容string.contains",
+  "version": "1.0.9",
+  "description": "fix: 兼容tree",
   "author": "JiangYahui <j532547613@gmail.com>",
   "main": "lib",
   "module": "lib/index.js",
