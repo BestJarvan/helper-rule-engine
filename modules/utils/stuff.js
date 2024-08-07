@@ -136,12 +136,27 @@ export const listValuesToArray = (listValuesObj) => {
   return listValuesArr;
 };
 
+
+function flattenArray(arr) {
+  const result = [];
+
+  arr.forEach(item => {
+    if (Array.isArray(item.children)) {
+      result.push(...flattenArray(item.children));
+    } else {
+      result.push(item);
+    }
+  });
+
+  return result;
+}
+
 // listValues can be {<value>: <title>, ..} or [{value, title}, ..] or [value, ..]
 export const getItemInListValues = (listValues, value) => {
   if (Array.isArray(listValues)) {
     let values;
     if (listValues.length && listValues[0].children) {
-      values = listValues.flat().map(v => listValue(v));
+      values = flattenArray(listValues).map(v => listValue(v));
     } else {
       values = listValues.map(v => listValue(v));
     }
